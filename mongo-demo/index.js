@@ -30,6 +30,7 @@ async function createCourse() {
   console.log("Result", result)
 }
 
+
 //Logical operators
 //or
 //and
@@ -69,6 +70,45 @@ async function findCourses() {
   console.log(courses)
 }
 
-findCourses()
+// //Query first, used if you receive an input from the client and you want to verify that its valid
+// async function updateCourse(id) {
+//   //Retrieves course first
+//   const course = await Course.findById(id)
+
+//   //Some logic to verify
+//   if (!course) return
+
+//   //Do stuff
+//   course.isPublished = true
+//   course.author = 'Another Author'
+
+//   course.save()
+// }
+
+
+//Update First
+async function updateCourse(id) {
+  //Retrieves course first
+  const course = await Course.findByIdAndUpdate(id, {
+    $set: {
+      author: 'Rich',
+      isPublished: false
+    }
+  }, { new: true })
+  console.log("Result", course)
+}
+
+// updateCourse('5ea0dc035cfc427ad69d527d')
+// findCourses()
 
 // createCourse()
+
+//Remove
+async function removeCourse(id) {
+
+  // const result = await Course.deleteMany({ _id: id })
+  const course = await Course.findByIdAndRemove(id)
+  console.log("Course", course)
+}
+
+removeCourse('5ea0dd101f658e7aeac75373')
