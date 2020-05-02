@@ -7,11 +7,40 @@ mongoose.connect('mongodb://localhost/playground', { useNewUrlParser: true })
 
 //Defines shape of data
 const courseSchema = new mongoose.Schema({
-  name: String,
+  name: { type: String, required: true, minlength: 5, maxlength: 255 },
   author: String,
-  tags: [String],
+  category: {
+    type: String,
+    enum: ['web', 'mobile', 'network'],
+    required: true,
+    uppercase: true,
+    trim: true
+  },
+  tags: {
+    type: Array,
+    validate: {
+      isAsync: true,
+      validator: function (v, callback) {
+        setTimeout(() => {
+          const result = v && v.length > 0
+          callback(result)
+        }, 4000)
+
+        // return v && v.length > 0
+      },
+      message: 'A course should have at least one tag.'
+    }
+  },
   date: { type: Date, default: Date.now() },
-  isPublished: Boolean
+  isPublished: Boolean,
+  price: {
+    type: Number,
+    required: function () { return this.isPublished },
+    min: 10,
+    max: 200,
+    get: v => Math.round(v),
+    set: v => Math.round(v)
+  }
 })
 
 //Model defines an object and is a class
@@ -20,16 +49,25 @@ const Course = mongoose.model('Course', courseSchema)
 
 async function createCourse() {
   const course = new Course({
-    name: "Angular Course",
+    name: "Stuff",
+    category: 'Web',
     author: "Ryan",
-    tags: ["angular", "frontend"],
-    isPublished: true
+    tags: ['frontend'],
+    isPublished: true,
+    price: 15
   })
 
-  const result = await course.save()
-  console.log("Result", result)
+  try {
+    const result = await course.save()
+    console.log("Result", result)
+  } catch (ex) {
+    for (field in ex.errors) {
+      console.log(ex.errors[field].message)
+    }
+  }
 }
 
+createCourse()
 
 //Logical operators
 //or
@@ -111,4 +149,4 @@ async function removeCourse(id) {
   console.log("Course", course)
 }
 
-removeCourse('5ea0dd101f658e7aeac75373')
+// removeCourse('5ea0dd101f658e7aeac75373')
